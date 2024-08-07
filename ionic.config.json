@@ -1,5 +1,14 @@
 {
-  "name": "im-poor-app",
-  "integrations": {},
-  "type": "angular"
+  "name": "alarm-o-clock",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#488AFF",
+      "sound": "beep.wav"
+    }
+  }
 }

@@ -1,0 +1,178 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Alarm</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense" class="ion-margin-start">
+    <ion-toolbar>
+      <app-theme-toggle></app-theme-toggle>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-list-header>
+    <ion-icon slot="start" name="alarm-outline"></ion-icon>
+    <ion-label class="ion-margin-start">Alarms</ion-label>
+    <!-- <ion-button shape="round" class="ion-margin-end" (click)="createAlarm()">
+      <ion-icon
+        slot="icon-only"
+        name="add-outline"
+        class="ion-margin"
+      ></ion-icon>
+    </ion-button> -->
+  </ion-list-header>
+  <ion-list [inset]="true">
+    @if(isCreatingAlarm === null || isCreatingAlarm === false){
+    <ion-item button (click)="createAlarm()" [disabled]="!isCapacitorPlatform">
+      <ion-icon slot="start" name="alarm"></ion-icon>
+      <ion-label>Tap here to create an alarm!</ion-label>
+    </ion-item>
+    } @for (a of alarms; track $index) {
+    <ion-item class="ion-align-items-center">
+      <ion-label>
+        <h3>{{a.name}}</h3>
+        <p>{{a.notification.schedule.at | date: 'short'}}</p>
+      </ion-label>
+      <ion-icon slot="end" color="danger" name="close-circle"></ion-icon>
+    </ion-item>
+    } @if(alarmFocused){
+    <ion-card color="translucent">
+      <ion-card-content color="translucent">
+        <ion-list [inset]="true">
+          <ion-item lines="none">
+            <ion-input
+              label="Alarm Name"
+              labelPlacement="stacked"
+              type="text"
+              placeholder="Awesome Input"
+              [(ngModel)]="alarmFocused.name"
+            ></ion-input>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-checkbox
+              justify="start"
+              labelPlacement="end"
+              [checked]="alarmFocused.isRepetitive"
+              (ionChange)="alarmFocused.isRepetitive = !alarmFocused.isRepetitive"
+              >Repeat</ion-checkbox
+            >
+          </ion-item>
+          @if(alarmFocused.isRepetitive){
+          <ion-item
+            color="secondary"
+            style="border-radius: 13px"
+            lines="none"
+            class="ion-margin"
+          >
+            <ion-icon slot="start" name="calendar" size="large"></ion-icon>
+            <ion-select
+              class="ion-margin-start"
+              [(ngModel)]="selectedWeekdays"
+              multiple="true"
+              placeholder="Schedule"
+            >
+              <ion-select-option *ngFor="let d of weekDays" [value]="d.value"
+                >{{d.label}}</ion-select-option
+              >
+            </ion-select>
+          </ion-item>
+          }
+          <ion-item
+            color="primary"
+            (click)="isTimePickerOpen = !isTimePickerOpen"
+            id="open-modal"
+            class="ion-margin"
+            style="border-radius: 13px"
+            lines="none"
+          >
+            <ion-icon slot="start" name="time" size="large"></ion-icon>
+            <ion-label class="ion-margin ion-nowrap">
+              <span>
+                {{ selectedPeriod?.value !== 0 ? (selectedTimeFrom.date | date:
+                'HH:mm') + ' - ' + (selectedTimeTo.date | date: 'HH:mm') :
+                (selectedTimeFrom.date | date: 'HH:mm') }}
+              </span>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+      <ion-grid>
+        <ion-row fixed>
+          <ion-col size="6">
+            <ion-button expand="block" color="danger" (click)="deleteAlarm()">
+              <ion-icon slot="start" name="close"></ion-icon>
+              Delete
+            </ion-button>
+          </ion-col>
+          <ion-col size="6">
+            <ion-button
+              [disabled]="checkCanCreate() === false"
+              (click)="setAlarm()"
+              expand="block"
+              color="success"
+            >
+              Create
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card>
+    }
+  </ion-list>
+  @for (p of pendingList; track $index) {
+  <ion-item>
+    <ion-label
+      >{{p.name}} ID {{p.id}} Notification ID {{p.notification.id}} Time
+      {{p.notification.schedule.at | date: 'short'}}</ion-label
+    >
+  </ion-item>
+  }
+</ion-content>
+
+<ion-modal
+  #modal
+  trigger="open-modal"
+  [isOpen]="isTimePickerOpen"
+  (didDismiss)="onDidDismiss($event)"
+>
+  <ng-template>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-button (click)="modal.dismiss(null, 'cancel')">Cancel</ion-button>
+      </ion-buttons>
+      <ion-buttons slot="end">
+        <ion-button (click)="modal.dismiss(currentValue, 'confirm')"
+          >Done</ion-button
+        >
+      </ion-buttons>
+    </ion-toolbar>
+
+    <ion-picker>
+      <ion-picker-column
+        [value]="selectedTimeFrom.hour"
+        (ionChange)="onIonChangeHour($event)"
+      >
+        <ion-picker-column-option *ngFor="let h of hours" [value]="h.value"
+          >{{h.text}}</ion-picker-column-option
+        >
+      </ion-picker-column>
+      <ion-picker-column
+        [value]="selectedTimeFrom.minute"
+        (ionChange)="onIonChangeMinute($event)"
+      >
+        <ion-picker-column-option *ngFor="let m of minutes" [value]="m.value"
+          >{{m.text}}</ion-picker-column-option
+        >
+      </ion-picker-column>
+      <ion-picker-column
+        [value]="targets[0].value"
+        (ionChange)="onIonChangeTarget($event)"
+      >
+        <ion-picker-column-option *ngFor="let t of targets" [value]="t.value"
+          >{{t.text}}</ion-picker-column-option
+        >
+      </ion-picker-column>
+    </ion-picker>
+  </ng-template>
+</ion-modal>

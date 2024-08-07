@@ -1,0 +1,16 @@
+<ion-button slot="end" class="ion-margin-end">
+  <ion-toggle
+    mode="ios"
+    [checked]="isDarkTheme"
+    (ionChange)="toggleTheme()"
+    slot="start"
+  ></ion-toggle>
+  <ion-icon
+    [name]="isDarkTheme ? 'moon' : 'sunny'"
+    [color]="isDarkTheme ? 'light' : 'warning'"
+    slot="end"
+  ></ion-icon>
+  <ion-label class="ion-margin">{{
+    isDarkTheme ? "Lights Off" : "Lights On"
+  }}</ion-label>
+</ion-button>
